@@ -1,7 +1,43 @@
-echo "# DataCleaningUsingPython" >> README.md
-git init
-git add README.md
-git commit -m "first commit"
-git branch -M main
-git remote add origin https://github.com/mrnightmare666/DataCleaningUsingPython.git
-git push -u origin main
+import pandas as pd
+import numpy as np
+df=pd.read_excel(r'C:\Users\Nikhil Mohamed\Desktop\DA\Alex\Pandas\Customer Call List.xlsx')
+
+#To delete Duplicates
+df=df.drop_duplicates()
+
+#To Delete unwanted Columns
+df=df.drop(columns ='Not_Useful_Column')
+
+#To remove unwantd characters from Last_Name Coloumn
+df['Last_Name'] = df['Last_Name'].str.replace(r'^\W+|\W+$', '', regex=True)
+
+#To format the Phone number column
+df['Phone_Number'] = df['Phone_Number'].str.replace(r'\D', '', regex=True)
+
+#To Format the phone Number column making it in xxx-xxx-xxxx format
+df['Phone_Number'] = df['Phone_Number'].str.replace(r'(\d{3})(\d{3})(\d{4})', r'\1-\2-\3')
+
+#Removing Nan Values
+df['Phone_Number'] = df['Phone_Number'].replace(np.nan, '', regex=True)
+
+#Splitting Address into various sub categories
+df[['Street_Address', 'State', 'Zip_Code']] = df['Address'].str.split(', ', n=2, expand=True)
+
+#Formatting Yes to Y and No to N
+df["Paying Customer"]=df["Paying Customer"].str.replace('Yes','Y')
+df["Paying Customer"]=df["Paying Customer"].str.replace('No','N')
+df["Do_Not_Contact"]=df["Do_Not_Contact"].str.replace('Yes','Y')
+df["Do_Not_Contact"]=df["Do_Not_Contact"].str.replace('No','N')
+
+#Replacing N/a and Nan values with blank
+df=df.replace('N/a','')
+df=df.replace('NaN','')
+
+#Replacing all Nan or none values with blank
+#df=df.fillna('')
+
+#removing people who gave Y for DoNot Contact
+df=df[df['Do_Not_Contact'] != 'Y']
+
+#removing people who does not have value for Contact Number
+df=df[df['Phone_Number'].notnull() & (df['Phone_Number'] != '')]
